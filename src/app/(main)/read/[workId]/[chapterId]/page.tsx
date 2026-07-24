@@ -469,6 +469,18 @@ export default function ReadingViewPage() {
              <span className="w-8 text-center text-kotoba-text">{rate}x</span>
              <button className="px-2 hover:text-kotoba-gold text-kotoba-muted" onClick={() => setRate(Math.min(2, rate + 0.25))}><Plus className="h-3 w-3" /></button>
            </div>
+           {availableVoices.length > 0 && (
+             <select
+               value={selectedVoiceURI || ""}
+               onChange={(e) => setSelectedVoiceURI(e.target.value)}
+               className="bg-transparent text-xs font-medium text-kotoba-muted hover:text-kotoba-text focus:outline-none max-w-[90px] sm:max-w-[120px] truncate cursor-pointer pl-2 border-l border-kotoba-border ml-1"
+               title="Cambiar voz"
+             >
+               {availableVoices.map(v => (
+                 <option key={v.voiceURI} value={v.voiceURI} className="bg-kotoba-bg text-kotoba-text">{v.name}</option>
+               ))}
+             </select>
+           )}
         </div>
       )}
     </div>
