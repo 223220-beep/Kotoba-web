@@ -19,7 +19,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://kotoba-web.vercel.app"),
+  metadataBase: new URL("https://kotoba-web-kappa.vercel.app"),
   alternates: {
     canonical: "/",
   },
