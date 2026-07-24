@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/useStore";
@@ -10,41 +10,54 @@ export default function DiscordCallback() {
   const router = useRouter();
   const fetchMe = useAuthStore((s) => s.fetchMe);
   const handled = useRef(false);
+  const [status, setStatus] = useState("Completando inicio de sesión...");
 
   useEffect(() => {
-    if (handled.current) return;
-    handled.current = true;
+    let cancelled = false;
 
-    const code = new URLSearchParams(window.location.search).get("code");
-    if (!code) {
-      router.push("/login?error=discord_no_code");
-      return;
-    }
+    const finish = async (accessToken: string) => {
+      if (handled.current) return;
+      handled.current = true;
+      setStatus("Guardando sesión...");
+      localStorage.setItem("kotoba_token", accessToken);
+      try {
+        await api.auth.discord();
+      } catch {}
+      await fetchMe();
+      if (!cancelled) router.push("/discover");
+    };
 
-    supabase.auth
-      .exchangeCodeForSession(code)
-      .then(async ({ error }) => {
-        if (error) {
-          router.push("/login?error=discord_exchange_failed");
-          return null;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+          finish(session.access_token);
         }
-        const { data } = await supabase.auth.getSession();
-        return data.session;
-      })
-      .then(async (session) => {
-        if (!session) return;
-        localStorage.setItem("kotoba_token", session.access_token);
-        try {
-          await api.auth.discord();
-        } catch {}
-        await fetchMe();
-        router.push("/discover");
-      });
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled && session && !handled.current) {
+        finish(session.access_token);
+      }
+    });
+
+    const timeout = setTimeout(() => {
+      if (!handled.current && !cancelled) {
+        setStatus("Tiempo de espera agotado. Redirigiendo...");
+        router.push("/login?error=discord_timeout");
+      }
+    }, 15000);
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [router, fetchMe]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-kotoba-bg">
-      <p className="text-kotoba-muted animate-pulse">Completando inicio de sesión...</p>
+      <p className="text-kotoba-muted animate-pulse">{status}</p>
     </div>
   );
 }
