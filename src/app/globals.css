@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+/* ================================
+   KOTOBA — Global Styles
+   ================================ */
+
+@theme inline {
+  --font-display: var(--font-cormorant);
+  --font-sans:    var(--font-inter);
+  
+  --color-kotoba-bg:          var(--color-bg);
+  --color-kotoba-surface:     var(--color-surface);
+  --color-kotoba-elevated:    var(--color-elevated);
+  --color-kotoba-gold:        var(--color-gold);
+  --color-kotoba-gold-light:  var(--color-gold-light);
+  --color-kotoba-coral:       var(--color-coral);
+  --color-kotoba-coral-dark:  var(--color-coral-dark);
+  --color-kotoba-text:        var(--color-text);
+  --color-kotoba-muted:       var(--color-muted);
+  --color-kotoba-border:      var(--color-border);
+  --color-kotoba-border-light: var(--color-border-light);
+  
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-shimmer: shimmer 2s linear infinite;
+  
+  --background-image-kotoba-hero: var(--hero-gradient);
+  --background-image-gold-shimmer: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+  
+  --shadow-gold-glow:  0 0 20px rgba(201,168,76,0.2);
+  --shadow-gold-glow-sm: 0 0 8px rgba(201,168,76,0.15);
+  --shadow-coral-glow: 0 0 20px rgba(232,130,90,0.3);
+  --shadow-card:       0 4px 24px rgba(0,0,0,0.15);
+  --shadow-card-hover: 0 8px 40px rgba(0,0,0,0.25);
+}
+
+@keyframes fade-in {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-up {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================
+   Theme Variables
+   ================================ */
+
+:root {
+  color-scheme: light;
+  --color-bg: #F9F8F6;
+  --color-surface: #FFFFFF;
+  --color-elevated: #F0EDE6;
+  --color-gold: #B38F36;
+  --color-gold-light: #C9A84C;
+  --color-coral: #D96A3F;
+  --color-coral-dark: #B64F2A;
+  --color-text: #1A1A1A;
+  --color-muted: #6B6158;
+  --color-border: #E5E2DC;
+  --color-border-light: #D6D2C9;
+  --hero-gradient: linear-gradient(135deg, #E8DFD0 0%, #D4C5A0 50%, #E8DFD0 100%);
+  --icon-bg: rgba(179, 143, 54, 0.12);
+}
+
+.dark {
+  color-scheme: dark;
+  --color-bg: #0D0D0D;
+  --color-surface: #141414;
+  --color-elevated: #1C1C1C;
+  --color-gold: #C9A84C;
+  --color-gold-light: #E8C97E;
+  --color-coral: #E8825A;
+  --color-coral-dark: #C96B43;
+  --color-text: #F0EDE6;
+  --color-muted: #7A7065;
+  --color-border: #2A2520;
+  --color-border-light: #3A342E;
+  --hero-gradient: linear-gradient(135deg, #0D0D0D 0%, #1C1208 50%, #0D0D0D 100%);
+  --icon-bg: rgba(201, 168, 76, 0.1);
+}
+
+html {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================
+   Typography
+   ================================ */
+
+.font-display {
+  font-family: var(--font-cormorant), Georgia, serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-cormorant), Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+/* ================================
+   Scrollbar custom
+   ================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* ================================
+   Selection
+   ================================ */
+
+::selection {
+  background: rgba(201, 168, 76, 0.3);
+  color: var(--color-text);
+}
+
+/* ================================
+   Focus ring
+   ================================ */
+
+*:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ================================
+   Transitions global
+   ================================ */
+
+*, *::before, *::after {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* ================================
+   Utility classes custom
+   ================================ */
+
+.glass {
+  background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+}
+
+.gold-text {
+  color: var(--color-gold);
+}
+
+.gold-text-light {
+  color: var(--color-gold-light);
+}
+
+.kotoba-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  border: none;
+}
+
+/* Skeleton loading animation */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-elevated) 25%, var(--color-border) 50%, var(--color-elevated) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
