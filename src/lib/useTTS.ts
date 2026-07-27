@@ -8,19 +8,35 @@ interface TTSState {
   activeParagraphIndex: number;
   activeCharIndex: number;
   rate: number;
+  pitch: number;
   availableVoices: SpeechSynthesisVoice[];
   selectedVoiceURI: string | null;
 }
 
 export function useTTS(paragraphs: string[]) {
-  const [state, setState] = useState<TTSState>({
-    isPlaying: false,
-    isPaused: false,
-    activeParagraphIndex: -1,
-    activeCharIndex: -1,
-    rate: 1,
-    availableVoices: [],
-    selectedVoiceURI: null,
+  const [state, setState] = useState<TTSState>(() => {
+    if (typeof window === "undefined") {
+      return {
+        isPlaying: false,
+        isPaused: false,
+        activeParagraphIndex: -1,
+        activeCharIndex: -1,
+        rate: 1,
+        pitch: 1,
+        availableVoices: [],
+        selectedVoiceURI: null,
+      };
+    }
+    return {
+      isPlaying: false,
+      isPaused: false,
+      activeParagraphIndex: -1,
+      activeCharIndex: -1,
+      rate: parseFloat(localStorage.getItem("kotoba_tts_rate") || "1"),
+      pitch: parseFloat(localStorage.getItem("kotoba_tts_pitch") || "1"),
+      availableVoices: [],
+      selectedVoiceURI: localStorage.getItem("kotoba_tts_voice") || null,
+    };
   });
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -64,6 +80,7 @@ export function useTTS(paragraphs: string[]) {
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = state.rate;
+        utterance.pitch = state.pitch;
         
         const voices = synthRef.current?.getVoices() || [];
         const selected = voices.find(v => v.voiceURI === state.selectedVoiceURI);
@@ -114,7 +131,7 @@ export function useTTS(paragraphs: string[]) {
 
       speakNext();
     },
-    [state.rate]
+    [state.rate, state.pitch]
   );
 
   const pause = useCallback(() => {
@@ -146,20 +163,30 @@ export function useTTS(paragraphs: string[]) {
 
   const setRate = useCallback((newRate: number) => {
     setState((s) => ({ ...s, rate: newRate }));
+    localStorage.setItem("kotoba_tts_rate", String(newRate));
   }, []);
 
-  // Effect to restart current paragraph if rate changes while playing
+  const setPitch = useCallback((newPitch: number) => {
+    setState((s) => ({ ...s, pitch: newPitch }));
+    localStorage.setItem("kotoba_tts_pitch", String(newPitch));
+  }, []);
+
+  // Effect to restart current paragraph if rate or pitch changes while playing
   const prevRateRef = useRef(state.rate);
+  const prevPitchRef = useRef(state.pitch);
   useEffect(() => {
-    if (prevRateRef.current !== state.rate) {
+    const rateChanged = prevRateRef.current !== state.rate;
+    const pitchChanged = prevPitchRef.current !== state.pitch;
+    if (rateChanged || pitchChanged) {
       prevRateRef.current = state.rate;
+      prevPitchRef.current = state.pitch;
       if (state.isPlaying && !state.isPaused && utteranceRef.current) {
         const currentIdx = state.activeParagraphIndex;
         stop();
         setTimeout(() => play(currentIdx), 50);
       }
     }
-  }, [state.rate, state.isPlaying, state.isPaused, state.activeParagraphIndex, stop, play]);
+  }, [state.rate, state.pitch, state.isPlaying, state.isPaused, state.activeParagraphIndex, stop, play]);
 
   // Load voices
   useEffect(() => {
@@ -185,6 +212,7 @@ export function useTTS(paragraphs: string[]) {
 
   const setSelectedVoiceURI = useCallback((uri: string) => {
     setState(s => ({ ...s, selectedVoiceURI: uri }));
+    localStorage.setItem("kotoba_tts_voice", uri);
   }, []);
 
   return {
@@ -194,6 +222,7 @@ export function useTTS(paragraphs: string[]) {
     resume,
     stop,
     setRate,
+    setPitch,
     setSelectedVoiceURI,
   };
 }
