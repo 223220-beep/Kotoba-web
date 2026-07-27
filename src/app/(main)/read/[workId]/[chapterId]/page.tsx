@@ -229,7 +229,7 @@ export default function ReadingViewPage() {
   };
 
   return (
-    <div className={`max-w-3xl mx-auto relative animate-fade-in min-h-screen ${(isPlaying || isPaused) ? 'pb-32' : 'pb-24'}`}>
+    <div className="max-w-3xl mx-auto relative animate-fade-in min-h-screen pb-24">
       {/* Click backdrop to toggle overlay */}
       <div className="fixed inset-0 z-0" onClick={toggleOverlay} />
 
@@ -254,11 +254,9 @@ export default function ReadingViewPage() {
               <span className="text-xs text-kotoba-muted mr-2">{chapter.title}</span>
             )}
 
-            {(!isPlaying && !isPaused) && (
-              <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setShowTTSPanel(s => !s); }} title="Escuchar en voz alta">
-                <Volume2 className="h-4 w-4" />
-              </Button>
-            )}
+            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setShowTTSPanel(s => !s); }} title="Escuchar en voz alta">
+              <Volume2 className={`h-4 w-4 ${(isPlaying || isPaused) ? 'text-kotoba-gold' : ''}`} />
+            </Button>
 
             <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setShowControls(s => !s); }} title="Ajustes">
               <Type className="h-4 w-4" />
@@ -351,13 +349,13 @@ export default function ReadingViewPage() {
         <div className="fixed inset-0 z-40" onClick={() => setShowControls(false)} />
       )}
 
-      {/* TTS Panel */}
-      {showTTSPanel && overlayVisible && !isPlaying && !isPaused && (
-        <div className="fixed top-20 right-4 z-50 bg-kotoba-elevated border border-kotoba-border rounded-xl p-5 shadow-card w-72 animate-fade-up space-y-4" onClick={e => e.stopPropagation()}>
+      {/* TTS Panel — dropdown from header */}
+      {showTTSPanel && overlayVisible && (
+        <div className="fixed top-[60px] left-1/2 -translate-x-1/2 z-50 bg-kotoba-elevated border border-kotoba-border rounded-xl p-5 shadow-card w-80 animate-fade-up space-y-4" onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Mic className="h-4 w-4 text-kotoba-gold" />
-              <span className="text-sm font-semibold text-kotoba-text">Voz</span>
+              <span className="text-sm font-semibold text-kotoba-text">Lector de voz</span>
             </div>
             <button onClick={() => setShowTTSPanel(false)} className="text-kotoba-muted hover:text-kotoba-text">
               <X className="h-4 w-4" />
@@ -434,16 +432,32 @@ export default function ReadingViewPage() {
             />
           </div>
 
-          {/* Play Button */}
-          <Button
-            className="w-full bg-kotoba-gold hover:bg-kotoba-gold-light text-white"
-            onClick={(e) => {
-              handlePlayClick(e);
-            }}
-          >
-            <Play className="h-4 w-4 mr-2" />
-            Escuchar
-          </Button>
+          {/* Playback Controls */}
+          <div className="flex items-center gap-3 pt-2 border-t border-kotoba-border">
+            {(isPlaying || isPaused) ? (
+              <>
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-kotoba-muted hover:text-red-400" onClick={stop} title="Detener">
+                  <Square className="h-4 w-4" />
+                </Button>
+                <Button variant="default" size="icon" className="h-10 w-10 rounded-full bg-kotoba-gold hover:bg-kotoba-gold-light text-white shadow-gold-glow-sm flex-shrink-0" onClick={() => isPaused ? resume() : pause()}>
+                  {isPaused ? <Play className="h-5 w-5 ml-1" /> : <Pause className="h-5 w-5" />}
+                </Button>
+                <span className="text-xs text-kotoba-muted">
+                  {isPaused ? 'Pausado' : 'Reproduciendo...'}
+                </span>
+              </>
+            ) : (
+              <Button
+                className="w-full bg-kotoba-gold hover:bg-kotoba-gold-light text-white"
+                onClick={(e) => {
+                  handlePlayClick(e);
+                }}
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Escuchar
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
@@ -518,7 +532,7 @@ export default function ReadingViewPage() {
         <>
           {/* Next chapter hint */}
           {showNextHint && nextChapter && (
-            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-kotoba-bg via-kotoba-bg/95 to-transparent pt-16 pb-6 px-4 flex justify-center z-30" style={{ paddingBottom: (isPlaying || isPaused) ? '5rem' : undefined }}>
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-kotoba-bg via-kotoba-bg/95 to-transparent pt-16 pb-6 px-4 flex justify-center z-30">
               <Link href={`/read/${workId}/${nextChapter.id}`}>
                 <Button size="lg" className="shadow-card gap-2">
                   Siguiente: {nextChapter.title} <ChevronRight className="h-5 w-5" />
@@ -527,7 +541,7 @@ export default function ReadingViewPage() {
             </div>
           )}
 
-          <div className={`flex items-center justify-between mt-24 pt-8 border-t border-kotoba-border px-4 ${(isPlaying || isPaused) ? 'pb-28' : ''}`}>
+          <div className="flex items-center justify-between mt-24 pt-8 border-t border-kotoba-border px-4">
             {prevChapter ? (
               <Link href={`/read/${workId}/${prevChapter.id}`}>
                 <Button variant="ghost" className="flex flex-col items-start h-auto py-2">
@@ -557,39 +571,6 @@ export default function ReadingViewPage() {
         </>
       )}
 
-      {/* Floating TTS Player */}
-      {(isPlaying || isPaused) && (
-        <div className="fixed bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 z-50 bg-kotoba-surface border border-kotoba-border rounded-2xl shadow-card-hover px-4 py-3 flex items-center gap-3 animate-fade-up" onClick={e => e.stopPropagation()}>
-           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-kotoba-muted hover:text-kotoba-text" onClick={stop}>
-             <Square className="h-4 w-4" />
-           </Button>
-           <Button variant="default" size="icon" className="h-10 w-10 rounded-full bg-kotoba-gold hover:bg-kotoba-gold-light text-white shadow-gold-glow-sm" onClick={() => isPaused ? resume() : pause()}>
-             {isPaused ? <Play className="h-5 w-5 ml-1" /> : <Pause className="h-5 w-5" />}
-           </Button>
-           <div className="flex items-center bg-kotoba-elevated rounded-full px-2 h-8 text-xs font-medium border border-kotoba-border">
-              <button className="px-2 hover:text-kotoba-gold text-kotoba-muted" onClick={() => setRate(Math.max(0.5, rate - 0.25))}><Minus className="h-3 w-3" /></button>
-              <span className="w-8 text-center text-kotoba-text">{rate}x</span>
-              <button className="px-2 hover:text-kotoba-gold text-kotoba-muted" onClick={() => setRate(Math.min(2, rate + 0.25))}><Plus className="h-3 w-3" /></button>
-           </div>
-           <div className="flex items-center bg-kotoba-elevated rounded-full px-2 h-8 text-xs font-medium border border-kotoba-border">
-              <button className="px-2 hover:text-kotoba-gold text-kotoba-muted" onClick={() => setPitch(Math.max(0.5, pitch - 0.1))}><Minus className="h-3 w-3" /></button>
-              <span className="w-8 text-center text-kotoba-text">{pitch.toFixed(1)}</span>
-              <button className="px-2 hover:text-kotoba-gold text-kotoba-muted" onClick={() => setPitch(Math.min(2, pitch + 0.1))}><Plus className="h-3 w-3" /></button>
-           </div>
-           {availableVoices.length > 0 && (
-             <select
-               value={selectedVoiceURI || ""}
-               onChange={(e) => setSelectedVoiceURI(e.target.value)}
-               className="bg-transparent text-xs font-medium text-kotoba-muted hover:text-kotoba-text focus:outline-none max-w-[90px] sm:max-w-[120px] truncate cursor-pointer pl-2 border-l border-kotoba-border ml-1"
-               title="Cambiar voz"
-             >
-               {availableVoices.map(v => (
-                 <option key={v.voiceURI} value={v.voiceURI} className="bg-kotoba-bg text-kotoba-text">{v.name}</option>
-               ))}
-             </select>
-           )}
-        </div>
-      )}
     </div>
   );
 }
