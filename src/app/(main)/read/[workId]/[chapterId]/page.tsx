@@ -439,7 +439,6 @@ export default function ReadingViewPage() {
             className="w-full bg-kotoba-gold hover:bg-kotoba-gold-light text-white"
             onClick={(e) => {
               handlePlayClick(e);
-              setShowTTSPanel(false);
             }}
           >
             <Play className="h-4 w-4 mr-2" />
