@@ -214,6 +214,10 @@ export default function ReadingViewPage() {
               <span className="text-xs text-kotoba-muted mr-2">{chapter.title}</span>
             )}
 
+            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setShowTTSPanel(s => !s); }} title="Escuchar en voz alta">
+              <Volume2 className={`h-4 w-4 ${(isPlaying || isPaused) ? 'text-kotoba-gold' : ''}`} />
+            </Button>
+
             <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setShowControls(s => !s); }} title="Ajustes">
               <Type className="h-4 w-4" />
             </Button>
@@ -394,19 +398,11 @@ export default function ReadingViewPage() {
         </>
       )}
 
-      {/* Floating TTS FAB — always visible, bottom-right */}
-      <button
-        onClick={(e) => { e.stopPropagation(); setShowTTSPanel(s => !s); }}
-        className={`fixed bottom-6 right-6 z-[60] w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all ${showTTSPanel ? 'bg-kotoba-gold text-white' : (isPlaying || isPaused) ? 'bg-kotoba-gold/90 text-white animate-pulse' : 'bg-kotoba-elevated border border-kotoba-border text-kotoba-muted hover:text-kotoba-text hover:border-kotoba-gold'}`}
-      >
-        <Volume2 className="h-5 w-5" />
-      </button>
-
-      {/* TTS Panel — dropdown from FAB */}
+      {/* TTS Panel — dropdown from header */}
       {showTTSPanel && (
         <>
           <div className="fixed inset-0 z-[55]" onClick={() => setShowTTSPanel(false)} />
-          <div className="fixed bottom-20 right-6 z-[60] bg-kotoba-elevated border border-kotoba-border rounded-xl p-5 shadow-card w-80 animate-fade-up space-y-4" onClick={e => e.stopPropagation()}>
+          <div className="fixed top-[60px] right-4 z-[60] bg-kotoba-elevated border border-kotoba-border rounded-xl p-5 shadow-card w-80 animate-fade-up space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Mic className="h-4 w-4 text-kotoba-gold" />
