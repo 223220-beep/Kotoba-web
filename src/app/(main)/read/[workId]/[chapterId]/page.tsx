@@ -137,13 +137,14 @@ export default function ReadingViewPage() {
       if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
       scrollTimeout.current = setTimeout(() => {
         isUserScrolling.current = false;
-      }, 4000);
+      }, 10000);
     };
     window.addEventListener('wheel', handleManualScroll, { passive: true });
     window.addEventListener('touchmove', handleManualScroll, { passive: true });
     return () => {
       window.removeEventListener('wheel', handleManualScroll);
       window.removeEventListener('touchmove', handleManualScroll);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
     };
   }, []);
 
@@ -188,14 +189,13 @@ export default function ReadingViewPage() {
     );
   }, [activeParagraphIndex, activeCharIndex]);
 
-  // Scroll active word into view
+  // Scroll active word into view — only when truly off-screen
   useEffect(() => {
     if (activeCharIndex >= 0 && !isUserScrolling.current) {
       const el = document.getElementById("tts-active-word");
       if (el) {
         const rect = el.getBoundingClientRect();
-        // Scroll if the word is in the bottom 30% or top 10% of the viewport
-        if (rect.bottom > window.innerHeight * 0.7 || rect.top < window.innerHeight * 0.1) {
+        if (rect.bottom < 0 || rect.top > window.innerHeight) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
@@ -229,7 +229,7 @@ export default function ReadingViewPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto pb-24 relative animate-fade-in min-h-screen">
+    <div className={`max-w-3xl mx-auto relative animate-fade-in min-h-screen ${(isPlaying || isPaused) ? 'pb-32' : 'pb-24'}`}>
       {/* Click backdrop to toggle overlay */}
       <div className="fixed inset-0 z-0" onClick={toggleOverlay} />
 
@@ -518,7 +518,7 @@ export default function ReadingViewPage() {
         <>
           {/* Next chapter hint */}
           {showNextHint && nextChapter && (
-            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-kotoba-bg via-kotoba-bg/95 to-transparent pt-16 pb-6 px-4 flex justify-center z-30">
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-kotoba-bg via-kotoba-bg/95 to-transparent pt-16 pb-6 px-4 flex justify-center z-30" style={{ paddingBottom: (isPlaying || isPaused) ? '5rem' : undefined }}>
               <Link href={`/read/${workId}/${nextChapter.id}`}>
                 <Button size="lg" className="shadow-card gap-2">
                   Siguiente: {nextChapter.title} <ChevronRight className="h-5 w-5" />
@@ -527,7 +527,7 @@ export default function ReadingViewPage() {
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-24 pt-8 border-t border-kotoba-border px-4">
+          <div className={`flex items-center justify-between mt-24 pt-8 border-t border-kotoba-border px-4 ${(isPlaying || isPaused) ? 'pb-28' : ''}`}>
             {prevChapter ? (
               <Link href={`/read/${workId}/${prevChapter.id}`}>
                 <Button variant="ghost" className="flex flex-col items-start h-auto py-2">
